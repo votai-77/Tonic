@@ -43,7 +43,7 @@ test("Order with phone blue color", async () => {
   action = new Action(page);
   await action.loginByEmail();
   await action.reserveNowBlue();
-}); // ==========================ORDER Phone LightBlue===============================
+}); // ==========================ORDER Phone LightBlue=============================== 
 test("Order with phone lightblue color", async () => {
   console.log("Reserve Now with phone lightblue color");
   action = new Action(page);
