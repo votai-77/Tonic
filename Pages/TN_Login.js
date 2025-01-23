@@ -1,5 +1,7 @@
 import { expect } from "@playwright/test";
 import { config } from "../Util/TN_Config";
+import path from "path";
+import fs from "fs";
 
 export class Login {
   constructor(page) {
@@ -24,16 +26,20 @@ export class Login {
   }
 
   async loginByGoogle() {
-    await this.page.goto('https://tonic.tongram.app/en');
+    await this.page.goto(config.url);
     await this.page.getByRole('banner').getByRole('img', { name: 'TONIC' }).nth(1).click();
     const page1Promise = this.page.waitForEvent('popup');
     await this.page.getByRole('button', { name: 'google Continue With Google' }).click();
-    const page1 = await page1Promise;
-    await this.page1.locator('//*[@id="identifierId"]').fill('toniclogin01@gmail.com');
-    await this.page1.getByRole('button', { name: 'Next' }).click();
-    await this.page1.locator('//*[@id="password"]/div[1]/div/div[1]/input').fill('056839908Tai');
-    await this.page1.getByRole('button', { name: 'Next' }).click();
-    await expect(this.page.getByText('Login success!')).toBeVisible({ timeout: 10000 });
+    const pagePopup = await page1Promise;
+    await pagePopup.getByLabel('Email or phone').click();
+
+    await pagePopup.getByLabel('Email or phone').fill(config.emailGoogle);
+    await pagePopup.getByRole('button', { name: 'Next' }).click();
+    await pagePopup.locator('//*[@id="password"]/div[1]/div/div[1]/input').fill(config.passwordGoogle);
+    await pagePopup.getByRole('button', { name: 'Next' }).click();
+    // await saveCookies();
+    await expect(page.getByText('Login success!')).toBeVisible({ timeout: 10000 });
+  
   }
 
   async verify() {
@@ -54,5 +60,14 @@ export class Login {
     // await this.page.locator('div').filter({ hasText: /^ID Card - Front\*Supported format: PNG, JPGBrowse Files$/ }).locator('div').nth(2).setInputFiles(config.inputImage);
     // await this.page.locator('div').filter({ hasText: /^ID Card - Back\*Supported format: PNG, JPGBrowse Files$/ }).locator('div').nth(2).setInputFiles(config.inputImage);
     await this.page.locator('//*[@id="app"]/main/section[3]/div/button').click();
+  }
+  async saveCookies(){
+    const cookies = await this.page.content().cookies();
+    const filePath = path.join(config.cookiesDir, config.cookiesFile);
+    if(!fs.existsSync(config.cookiesDir) )
+    {
+      fs.mkdirSync(config.cookiesDir,{recursive: true});
+    }
+    fs.writeFileSync(filePath,JSON.stringify(cookies,null,2));
   }
 }
